@@ -9,8 +9,9 @@ from datetime import datetime
 
 EPOCHS = 40
 BATCH_SIZE = 16
-DROPOUT = 0.5
+DROPOUT = 0.25
 LEARNING_RATE = 0.0001
+SAVE_PATH = "save_models"
 
 log_file = "./log_file.txt"
 
@@ -184,6 +185,7 @@ def run():
         model_output = layers(layer3, layer4, layer7, num_classes)
         logits, train_op, cross_entropy_loss = optimize(model_output, correct_label, learning_rate, num_classes)
 
+        saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
 
@@ -193,6 +195,10 @@ def run():
         train_nn(sess, EPOCHS, BATCH_SIZE, get_batches_fn,
                  train_op, cross_entropy_loss, input_image,
                  correct_label, keep_prob, learning_rate)
+
+        if not tf.gfile.IsDirectory(SAVE_PATH):
+            tf.gfile.MakeDirs(SAVE_PATH)
+        saver.save(sess, SAVE_PATH+"/save-"+str(DROPOUT))
 
         # TODO: Save inference data using helper.save_inference_samples
         helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
