@@ -148,7 +148,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
         print()
 
         with open(log_file, "a") as f:
-            f.write("{}:Epoch:{}, Loss:(:.3)\n".format(datetime.now(), epoch+1, total_loss))
+            f.write("{}:Epoch:{}, Loss:{:.3}\n".format(datetime.now(), epoch+1, total_loss))
 
 tests.test_train_nn(train_nn)
 
