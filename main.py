@@ -5,10 +5,17 @@ import helper
 import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
+from datetime import datetime
 
 EPOCHS = 40
 BATCH_SIZE = 16
-DROPOUT = 0.75
+DROPOUT = 0.5
+LEARNING_RATE = 0.0001
+
+log_file = "./log_file.txt"
+
+with open(log_file, "a") as f:
+    f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(EPOCHS, BATCH_SIZE, DROPOUT))
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -64,6 +71,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # TODO: Implement function
     layer3, layer4, layer7 = vgg_layer3_out, vgg_layer4_out, vgg_layer7_out
 
+    # 中间的layer， filter层数同分类数
     fcn8 = tf.layers.conv2d(layer7, filters=num_classes, kernel_size=1, name="fcn8")
 
     fcn9 = tf.layers.conv2d_transpose(fcn8, filters=layer4.shape.as_list()[-1],
@@ -125,7 +133,6 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     """
     # TODO: Implement function
 
-    learning_rate_value = 0.001
     for epoch in range(epochs):
 
         total_loss = 0
@@ -134,11 +141,14 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             loss, _ = sess.run([cross_entropy_loss, train_op], feed_dict={input_image: X_batch,
                                                                           correct_label:gt_batch,
                                                                           keep_prob:DROPOUT,
-                                                                          learning_rate: learning_rate_value})
+                                                                          learning_rate: LEARNING_RATE})
             total_loss += loss
         print("EPOCH {} ...".format(epoch + 1))
         print("Loss = {:.3f}".format(total_loss))
         print()
+
+        with open(log_file, "a") as f:
+            f.write("{}:Epoch:{}, Loss:(:.3)\n".format(datetime.now(), epoch+1, total_loss))
 
 tests.test_train_nn(train_nn)
 
@@ -152,7 +162,6 @@ def run():
 
     correct_label = tf.placeholder(tf.float32, [None, image_shape[0], image_shape[1], num_classes])
     learning_rate = tf.placeholder(tf.float32)
-    keep_prob = tf.placeholder(tf.float32)
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
