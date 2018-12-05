@@ -15,7 +15,7 @@ LEARNING_RATE = 0.0001
 log_file = "./log_file.txt"
 
 with open(log_file, "a") as f:
-    f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(EPOCHS, BATCH_SIZE, DROPOUT))
+    f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(EPOCHS, BATCH_SIZE, DROPOUT, LEARNING_RATE))
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
