@@ -7,20 +7,21 @@ from distutils.version import LooseVersion
 import project_tests as tests
 from datetime import datetime
 
-EPOCHS = 40
-BATCH_SIZE = 16
-DROPOUT = 0.0
-LEARNING_RATE = 0.0001
+FLAGS = tf.app.flags.FLAGS
+
+tf.app.flags.DEFINE_integer("EPOCHS", 60, "total run epochs")
+tf.app.flags.DEFINE_integer("BATCH_SIZE", 16, "Batch size")
+tf.app.flags.DEFINE_float("DROPOUT", 0.5, "keep prob")
+tf.app.flags.DEFINE_float("LEARNING_RATE", 0.0001, "learning rate")
+
+print("keep prob:{}, epoch:{}".format(FLAGS.DROPOUT, FLAGS.EPOCHS))
+
 SAVE_PATH = "save_models"
-GRAPH_PATH = "Graph"
 
-if not tf.gfile.IsDirectory(GRAPH_PATH):
-    tf.gfile.MakeDirs(GRAPH_PATH)
-
-log_file = "./log_file.txt"
+log_file = "./log_file_drop_{:3f}.txt".format(FLAGS.DROPOUT)
 
 with open(log_file, "a") as f:
-    f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(EPOCHS, BATCH_SIZE, DROPOUT, LEARNING_RATE))
+    f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(FLAGS.EPOCHS, FLAGS.BATCH_SIZE, FLAGS.DROPOUT, FLAGS.LEARNING_RATE))
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -61,7 +62,7 @@ def load_vgg(sess, vgg_path):
 
     return image_input, keep_prob, layer3_out, layer4_out, layer7_out
 
-tests.test_load_vgg(load_vgg, tf)
+# tests.test_load_vgg(load_vgg, tf)
 
 
 def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
@@ -94,7 +95,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
 
     return fcn11
 
-tests.test_layers(layers)
+# tests.test_layers(layers)
 
 
 def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
@@ -118,7 +119,7 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
 
     return logits, train_op, loss_op
 
-tests.test_optimize(optimize)
+# tests.test_optimize(optimize)
 
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
@@ -145,8 +146,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
 
             loss, _ = sess.run([cross_entropy_loss, train_op], feed_dict={input_image: X_batch,
                                                                           correct_label:gt_batch,
-                                                                          keep_prob:DROPOUT,
-                                                                          learning_rate: LEARNING_RATE})
+                                                                          keep_prob:FLAGS.DROPOUT,
+                                                                          learning_rate: FLAGS.LEARNING_RATE})
             total_loss += loss
         print("EPOCH {} ...".format(epoch + 1))
         print("Loss = {:.3f}".format(total_loss))
@@ -155,7 +156,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
         with open(log_file, "a") as f:
             f.write("{}:Epoch:{}, Loss:{:.3}\n".format(datetime.now(), epoch+1, total_loss))
 
-tests.test_train_nn(train_nn)
+# tests.test_train_nn(train_nn)
 
 
 def run():
@@ -196,7 +197,7 @@ def run():
         print("Model bulid successful, starting training")
 
         # TODO: Train NN using the train_nn function
-        train_nn(sess, EPOCHS, BATCH_SIZE, get_batches_fn,
+        train_nn(sess, FLAGS.EPOCHS, FLAGS.BATCH_SIZE, get_batches_fn,
                  train_op, cross_entropy_loss, input_image,
                  correct_label, keep_prob, learning_rate)
 
@@ -206,9 +207,7 @@ def run():
 
         if not tf.gfile.IsDirectory(SAVE_PATH):
             tf.gfile.MakeDirs(SAVE_PATH)
-        saver.save(sess, SAVE_PATH+"/save-"+str(DROPOUT))
-        tf.summary.FileWriter(GRAPH_PATH, graph=sess.graph)
-
+        saver.save(sess, SAVE_PATH+"/save-"+str(FLAGS.DROPOUT))
     
         # OPTIONAL: Apply the trained model to a video
 
