@@ -9,9 +9,13 @@ from datetime import datetime
 
 EPOCHS = 40
 BATCH_SIZE = 16
-DROPOUT = 0.25
+DROPOUT = 0.0
 LEARNING_RATE = 0.0001
 SAVE_PATH = "save_models"
+GRAPH_PATH = "Graph"
+
+if not tf.gfile.IsDirectory(GRAPH_PATH):
+    tf.gfile.MakeDirs(GRAPH_PATH)
 
 log_file = "./log_file.txt"
 
@@ -196,13 +200,16 @@ def run():
                  train_op, cross_entropy_loss, input_image,
                  correct_label, keep_prob, learning_rate)
 
+
+        # Save inference data using helper.save_inference_samples
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+
         if not tf.gfile.IsDirectory(SAVE_PATH):
             tf.gfile.MakeDirs(SAVE_PATH)
         saver.save(sess, SAVE_PATH+"/save-"+str(DROPOUT))
+        tf.summary.FileWriter(GRAPH_PATH, graph=sess.graph)
 
-        # TODO: Save inference data using helper.save_inference_samples
-        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
-
+    
         # OPTIONAL: Apply the trained model to a video
 
 
