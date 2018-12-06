@@ -9,7 +9,7 @@ from datetime import datetime
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_integer("EPOCHS", 60, "total run epochs")
+tf.app.flags.DEFINE_integer("EPOCHS", 40, "total run epochs")
 tf.app.flags.DEFINE_integer("BATCH_SIZE", 16, "Batch size")
 tf.app.flags.DEFINE_float("DROPOUT", 0.5, "keep prob")
 tf.app.flags.DEFINE_float("LEARNING_RATE", 0.0001, "learning rate")
@@ -19,6 +19,7 @@ print("keep prob:{}, epoch:{}".format(FLAGS.DROPOUT, FLAGS.EPOCHS))
 SAVE_PATH = "save_models"
 
 log_file = "./log_file_drop_{:3f}.txt".format(FLAGS.DROPOUT)
+
 
 with open(log_file, "a") as f:
     f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(FLAGS.EPOCHS, FLAGS.BATCH_SIZE, FLAGS.DROPOUT, FLAGS.LEARNING_RATE))
