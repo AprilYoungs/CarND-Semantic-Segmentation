@@ -1,0 +1,1 @@
+Epoch:1, BATCH_SIZE:16, DROPOUT:1.0, lr:0.0001
