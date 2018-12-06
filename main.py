@@ -6,6 +6,7 @@ import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
 from datetime import datetime
+import shutil
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -14,12 +15,19 @@ tf.app.flags.DEFINE_integer("BATCH_SIZE", 16, "Batch size")
 tf.app.flags.DEFINE_float("DROPOUT", 0.5, "keep prob")
 tf.app.flags.DEFINE_float("LEARNING_RATE", 0.0001, "learning rate")
 
-print("keep prob:{}, epoch:{}".format(FLAGS.DROPOUT, FLAGS.EPOCHS))
-
+num_classes = 2
+image_shape = (160, 576)  # KITTI dataset uses 160x576 images
+data_dir = './data'
+runs_dir = './runsruns'
 SAVE_PATH = "save_models"
 
-log_file = "./log_file_drop_{:3f}.txt".format(FLAGS.DROPOUT)
 
+output_dir = os.path.join(runs_dir, "drop-"+str(FLAGS.DROPOUT))
+if os.path.exists(output_dir):
+    shutil.rmtree(output_dir)
+os.makedirs(output_dir)
+
+log_file = "{}/log_file_drop_{:.3f}.txt".format(output_dir, FLAGS.DROPOUT)
 
 with open(log_file, "a") as f:
     f.write("Epoch:{}, BATCH_SIZE:{}, DROPOUT:{}, lr:{}\n".format(FLAGS.EPOCHS, FLAGS.BATCH_SIZE, FLAGS.DROPOUT, FLAGS.LEARNING_RATE))
@@ -161,10 +169,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
 
 
 def run():
-    num_classes = 2
-    image_shape = (160, 576)  # KITTI dataset uses 160x576 images
-    data_dir = './data'
-    runs_dir = './runs'
+
     tests.test_for_kitti_dataset(data_dir)
 
     correct_label = tf.placeholder(tf.float32, [None, image_shape[0], image_shape[1], num_classes])
@@ -204,11 +209,12 @@ def run():
 
 
         # Save inference data using helper.save_inference_samples
-        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        helper.save_inference_samples(output_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
-        if not tf.gfile.IsDirectory(SAVE_PATH):
-            tf.gfile.MakeDirs(SAVE_PATH)
-        saver.save(sess, SAVE_PATH+"/save-"+str(FLAGS.DROPOUT))
+        # save sess for later prediction
+        # if not tf.gfile.IsDirectory(SAVE_PATH):
+        #     tf.gfile.MakeDirs(SAVE_PATH)
+        # saver.save(sess, SAVE_PATH+"/save-"+str(FLAGS.DROPOUT))
     
         # OPTIONAL: Apply the trained model to a video
 
