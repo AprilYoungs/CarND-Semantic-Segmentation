@@ -18,7 +18,7 @@ tf.app.flags.DEFINE_float("LEARNING_RATE", 0.0001, "learning rate")
 num_classes = 2
 image_shape = (160, 576)  # KITTI dataset uses 160x576 images
 data_dir = './data'
-runs_dir = './runsruns'
+runs_dir = './runs'
 SAVE_PATH = "save_models"
 
 
